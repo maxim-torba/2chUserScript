@@ -1,0 +1,47 @@
+
+/*2ch Stylebot for extentions "Stylebot"
+you need Userscript for work!!!*/
+
+#fullscreen-container {
+    z-index: 6;
+}
+
+.amOfWebm {
+    height: 20px;
+    left: 86.5%;
+    position: fixed;
+    text-align: center;
+    top: 91%;
+    width: 150px;
+    z-index: 0;
+}
+
+.cur {
+    cursor: none;
+}
+
+.nextVideo, .previousVideo {
+    -webkit-user-select: none;
+    background: rgba(0,0,0, .1);
+    height: 100%;
+    left: 97%;
+    padding: 400px 0;
+    position: fixed;
+    text-align: center;
+    top: 0%;
+    transition: all .3s;
+    z-index: 0;
+}
+
+.previousVideo {
+    left: 0%;
+}
+
+.nextVideo:hover, .previousVideo:hover {
+    background: rgba(0,0,0, .7);
+    padding: 350px 0;
+}
+
+
+
+
