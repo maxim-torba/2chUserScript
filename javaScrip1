@@ -1,0 +1,101 @@
+//2ch User_script for Tampermonkey
+//you need css, or rather the extentions "Stylebot" for whork
+
+// ==UserScript==
+// @name         2ch Userscript
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  try to take over the world!
+// @author       You
+// @include       https://2ch.hk/*
+// @grant        none
+// ==/UserScript==
+/* jshint -W097 */
+'use strict';
+
+
+var numb = 0;
+//var el = document.querySelectorAll('.image-link>a');
+var el = document.querySelectorAll('a[name="expandfunc"]');
+
+var amountOfWebm = document.createElement('div');
+amountOfWebm.className = 'amOfWebm';
+if(el.length == 0) {
+    amountOfWebm.style.visibility = "hidden";
+}
+amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
+document.body.appendChild(amountOfWebm);
+
+var next = document.createElement('div');
+next.className = 'nextVideo';
+next.innerHTML = ' >>> ';
+document.body.appendChild(next);
+
+var previous = document.createElement('div');
+previous.className = 'previousVideo';
+previous.innerHTML = ' <<< ';
+document.body.appendChild(previous);
+
+next.onclick = function(event){
+    if(numb == el.length-1){
+        numb = -1;
+    }
+    start(++numb);
+    event.stopPropagation();
+};
+previous.onclick = function(event){
+    if(numb === 0) {
+        numb = el.length;
+    }
+    start(--numb);
+
+    event.stopPropagation();
+};
+
+
+
+function start(numb){
+    amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
+    if(el[numb].getAttribute('onclick').slice(0,6) == 'return'){
+        var b = el[numb].getAttribute('onclick').slice(7);
+    }
+    else{
+        var b = el[numb].getAttribute('onclick').slice(0, -14);
+    }
+
+    /* if(el[numb].querySelector('img').className != 'img preview webm-file '){
+        var timeForPic = setTimeout(function(){
+            ++numb;
+            start(numb);
+        }, 5000);
+    }*/
+    eval(b);
+}
+
+
+setInterval(function(){   
+    el = document.querySelectorAll('a[name="expandfunc"]');
+    amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
+    var vid = document.getElementById('html5video');
+    if(vid){
+       /* var fullScreen = document.getElementById('fullscreen-container');
+        fullScreen.onclick = function(event){
+            vid.pause(); 
+             event.stopPropagation();
+            return false;
+        };*/
+        vid.classList.add('cur');
+        vid.onmousemove = function(){
+            vid.classList.remove('cur');
+        };
+
+        for(var i = 0; i<el.length; i++){
+            if(vid.querySelector('source').getAttribute('src') == el[i].getAttribute('href')){
+                numb = i;
+            }
+        }
+        vid.removeAttribute('loop');
+        vid.onended = function(){
+            start(++numb);
+        };
+    }}, 1000);
