@@ -42,6 +42,9 @@ you need Userscript for work!!!*/
     padding: 350px 0;
 }
 
+span.spoiler {
+    background: #385;
+}
 
 
 
