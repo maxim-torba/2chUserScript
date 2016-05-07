@@ -17,6 +17,8 @@
 var numb = 0;
 //var el = document.querySelectorAll('.image-link>a');
 var el = document.querySelectorAll('a[name="expandfunc"]');
+var playPause = true;
+var vid;
 
 var amountOfWebm = document.createElement('div');
 amountOfWebm.className = 'amOfWebm';
@@ -33,8 +35,14 @@ document.body.appendChild(next);
 
 var previous = document.createElement('div');
 previous.className = 'previousVideo';
-previous.innerHTML = ' <<< ';
+previous.innerHTML = ' << ';
 document.body.appendChild(previous);
+
+var durationVideo = document.createElement('div');
+durationVideo.className = 'durationVideo';
+durationVideo.style.visibility = "hidden";
+document.body.appendChild(durationVideo);
+
 
 next.onclick = function(event){
     if(numb == el.length-1){
@@ -72,13 +80,78 @@ function start(numb){
     eval(b);
 }
 
+document.addEventListener("keydown", function(e) {
+    if (e.keyCode == 88/*x*/) {
+        if(playPause){
+            vid.pause();
+            playPause = !playPause;
+        }
+        else{
+            vid.play();
+            playPause = !playPause;
+        }
+    }
+    if(e.keyCode == 67/*c*/){
+        vid.currentTime += 5;
+    }
+    if(e.keyCode == 90/*z*/){
+        vid.currentTime -= 5;
+    }
+    if(e.keyCode == 87/*w*/){
+        if(vid.volume > 0.85){
+            vid.volume = 1;
+        }
+        else  {
+            vid.muted = false;
+            vid.volume += 0.1;
+        }
+    }
+    if(e.keyCode == 83/*s*/){
+        if(vid.volume <0.15){
+            vid.muted = true;
+        }
+        else  {
+            vid.muted = false;
+            vid.volume -= 0.1;
+        }
+    }
+    if(e.keyCode == 81/*q*/){
+        vid.webkitRequestFullscreen();
+    }
+    if(e.keyCode == 69/*e*/){
+        vid.webkitExitFullScreen();   
+    }
+    if(e.keyCode == 86/*v*/){
+        vid.parentElement.style.width = parseInt(getComputedStyle(vid.parentElement).width)*1.1+'px';
+        vid.parentElement.style.height = parseInt(getComputedStyle(vid.parentElement).height)*1.1+'px';
+        vid.parentElement.style.top = parseInt(getComputedStyle(vid.parentElement).top)*0.9+'px';
+        vid.parentElement.style.left = parseInt(getComputedStyle(vid.parentElement).left)*0.9+'px';
+    }
+    if(e.keyCode == 70/*f*/){
+        location.hash = numb;
+    }
+      if(e.keyCode == 68/*d*/){
+        start(++numb);
+          e.stopPropagation();
+    }
+}, false);
 
 setInterval(function(){   
     el = document.querySelectorAll('a[name="expandfunc"]');
     amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
-    var vid = document.getElementById('html5video');
+    if(el.length != 0) {
+        amountOfWebm.style.visibility = "visible";
+    }
+    vid = document.getElementById('html5video');
+
     if(vid){
-       /* var fullScreen = document.getElementById('fullscreen-container');
+        durationVideo.style.visibility = "visible";
+
+        durationVideo.innerHTML = Math.floor(vid.currentTime) +" / "+ Math.floor(vid.duration);
+
+        // console.log(new Date(vid.played.end(0)*1000).toUTCString().split(/ /)[4] +" из "+ new Date(vid.duration*1000).toUTCString().split(/ /)[4]);
+
+        /* var fullScreen = document.getElementById('fullscreen-container');
         fullScreen.onclick = function(event){
             vid.pause(); 
              event.stopPropagation();
@@ -93,9 +166,31 @@ setInterval(function(){
             if(vid.querySelector('source').getAttribute('src') == el[i].getAttribute('href')){
                 numb = i;
             }
+            if(!el[i].querySelector('a')){
+                var a = document.createElement('a');
+                a.setAttribute('name', i);
+                el[i].appendChild(a);
+            }
         }
         vid.removeAttribute('loop');
         vid.onended = function(){
             start(++numb);
         };
-    }}, 1000);
+    }
+    else{
+        durationVideo.style.visibility = "hidden";
+    }
+}, 1000);
+
+next.onmouseover = function() {
+    document.documentElement.style.paddingRight = "3px";
+    document.documentElement.style.overflow = 'hidden';
+};
+next.onmouseout = function(){
+    document.documentElement.style.paddingRight = "0px";
+    document.documentElement.style.overflow = 'visible';
+};
+next.onwheel = function(){
+    document.documentElement.style.paddingRight = "0px";
+    document.documentElement.style.overflow = 'visible';
+};
