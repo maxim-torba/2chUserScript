@@ -1,50 +1,53 @@
-
-/*2ch Stylebot for extentions "Stylebot"
-you need Userscript for work!!!*/
+/*2ch-stylesheet for extentions like "Stylebot"
+also you need to install userscript*/
 
 #fullscreen-container {
     z-index: 6;
 }
 
-.amOfWebm {
+.amountFiles, .durationVideo {
     height: 20px;
-    left: 86.5%;
+    right: 80px;
     position: fixed;
-    text-align: center;
-    top: 91%;
+    text-align: right;
+    bottom: 35px;
     width: 150px;
     z-index: 0;
+}
+
+.durationVideo {
+    bottom: 55px   
+;
 }
 
 .cur {
     cursor: none;
 }
 
-.nextVideo, .previousVideo {
+.nextFileSwitch, .previousFileSwitch {
     -webkit-user-select: none;
     background: rgba(0,0,0, .1);
     height: 100%;
-    left: 97%;
+    right: 0;
     padding: 400px 0;
     position: fixed;
     text-align: center;
-    top: 0%;
-    transition: all .3s;
+    top: 0;
+    transition: all .5s;
     z-index: 0;
 }
 
-.previousVideo {
-    left: 0%;
-}
-
-.nextVideo:hover, .previousVideo:hover {
+.nextFileSwitch:hover, .previousFileSwitch:hover {
     background: rgba(0,0,0, .7);
     padding: 350px 0;
+}
+
+.previousFileSwitch {
+    width: 30px;
+    left: 0;
 }
 
 span.spoiler {
     background: #385;
 }
-
-
 
