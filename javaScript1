@@ -1,5 +1,5 @@
-//2ch User_script for Tampermonkey
-//you need css, or rather the extentions "Stylebot" for whork
+//2ch User Script
+//you need extention "Stylebot" or something else for style sheet
 
 // ==UserScript==
 // @name         2ch Userscript
@@ -13,184 +13,158 @@
 /* jshint -W097 */
 'use strict';
 
+$(function(){
+    var fileNumber = 0;
+    var videoPlayer;
+    var once = false;
+    var allFiles = $('.img.preview');
+    var amountFiles = document.createElement("div");
+    $(amountFiles).addClass('amountFiles').text(allFiles.length);
 
-var numb = 0;
-//var el = document.querySelectorAll('.image-link>a');
-var el = document.querySelectorAll('a[name="expandfunc"]');
-var playPause = true;
-var vid;
+    var durationVideo = document.createElement('div');
+    $(durationVideo).addClass('durationVideo');
 
-var amountOfWebm = document.createElement('div');
-amountOfWebm.className = 'amOfWebm';
-if(el.length == 0) {
-    amountOfWebm.style.visibility = "hidden";
-}
-amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
-document.body.appendChild(amountOfWebm);
+    var nextFileSwitch = document.createElement('div');
+    $(nextFileSwitch).addClass('nextFileSwitch').text('>>>').on('click', function(e){
+        switchFile(++fileNumber);
+        e.stopPropagation();
+    });
 
-var next = document.createElement('div');
-next.className = 'nextVideo';
-next.innerHTML = ' >>> ';
-document.body.appendChild(next);
+    var previousFileSwitch = document.createElement('div');
+    $(previousFileSwitch).addClass('previousFileSwitch').text('<<').on('click', function(e){
+        switchFile(--fileNumber);
+        e.stopPropagation();
+    });
 
-var previous = document.createElement('div');
-previous.className = 'previousVideo';
-previous.innerHTML = ' << ';
-document.body.appendChild(previous);
+    $("body").append(amountFiles, durationVideo, nextFileSwitch, previousFileSwitch).on('click', function(){once = false;});
 
-var durationVideo = document.createElement('div');
-durationVideo.className = 'durationVideo';
-durationVideo.style.visibility = "hidden";
-document.body.appendChild(durationVideo);
+    var map = {88: false, 83: false, 90: false, 67: false, 81: false, 69: false, 87: false};
+    //88-X; 83-S; 90-Z; 67-C; 81-Q; 69-E: 87-W;
+    $(document).keydown(function(e) {
+        if (e.keyCode in map) {
+            map[e.keyCode] = true;
+            if (map[88]) {
+                if(map[83]){
+                    if(videoPlayer.paused){
+                        videoPlayer.play();
+                    } else {
+                        videoPlayer.pause();
+                    }
+                }
+                if(map[90]){
+                    videoPlayer.currentTime -= 5;
+                }
+                if(map[67]){
+                    videoPlayer.currentTime += 5;
+                }
+                if(map[81]){
+                    var ratio = 1.2;
+                    var ratio2 = 0.8;
+                    var fullscreenContainer = $('#fullscreen-container');
+                    fullscreenContainer.width(fullscreenContainer.width() * ratio)
+                        .height(fullscreenContainer.height() * ratio)
+                        .css('left', parseFloat(fullscreenContainer.css('left'))*ratio2)
+                        .css('top', parseFloat(fullscreenContainer.css('top'))*ratio2)
+                }
+            }
+            if(map[83]){
+                if(map[67]){
+                    if(videoPlayer.volume > 0.85){
+                        videoPlayer.volume = 1;
+                    }
+                    else  {
+                        videoPlayer.muted = false;
+                        videoPlayer.volume += 0.1;
+                    }
+                }
+                if(map[90]){
+                    if(videoPlayer.volume <0.15){
+                        videoPlayer.muted = true;
+                    }
+                    else  {
+                        videoPlayer.muted = false;
+                        videoPlayer.volume -= 0.1;
+                    }
+                }
+                if(map[81]){
+                    videoPlayer.webkitRequestFullscreen();
+                }
+                if(map[69]){
+                    videoPlayer.webkitExitFullScreen();
+                }
+                if(map[87]){
+                    location.hash = $(allFiles[fileNumber]).closest('.post-wrapper').attr('id');
+                }
+            }
+        }
+    }).keyup(function(e) {
+        if (e.keyCode in map) {
+            map[e.keyCode] = false;
+        }
+    });
 
+    function switchFile(fileNumber){
+        fileNumber = setFileNumber();
+        var callbackFromString;
+        var returnedFunction = $(allFiles[fileNumber]).parent().attr('onclick');
 
-next.onclick = function(event){
-    if(numb == el.length-1){
-        numb = -1;
-    }
-    start(++numb);
-    event.stopPropagation();
-};
-previous.onclick = function(event){
-    if(numb === 0) {
-        numb = el.length;
-    }
-    start(--numb);
-
-    event.stopPropagation();
-};
-
-
-
-function start(numb){
-    amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
-    if(el[numb].getAttribute('onclick').slice(0,6) == 'return'){
-        var b = el[numb].getAttribute('onclick').slice(7);
-    }
-    else{
-        var b = el[numb].getAttribute('onclick').slice(0, -14);
-    }
-
-    /* if(el[numb].querySelector('img').className != 'img preview webm-file '){
-        var timeForPic = setTimeout(function(){
-            ++numb;
-            start(numb);
-        }, 5000);
-    }*/
-    eval(b);
-}
-
-document.addEventListener("keydown", function(e) {
-    if (e.keyCode == 88/*x*/) {
-        if(playPause){
-            vid.pause();
-            playPause = !playPause;
+        if(returnedFunction.slice(0,6) == 'return'){
+            callbackFromString = returnedFunction.slice(7);
         }
         else{
-            vid.play();
-            playPause = !playPause;
+            callbackFromString = returnedFunction.slice(0, -14);
         }
+        eval(callbackFromString); //TODO: you know
+        once = false;
     }
-    if(e.keyCode == 67/*c*/){
-        vid.currentTime += 5;
-    }
-    if(e.keyCode == 90/*z*/){
-        vid.currentTime -= 5;
-    }
-    if(e.keyCode == 87/*w*/){
-        if(vid.volume > 0.85){
-            vid.volume = 1;
+
+    function setFileNumber(){
+        if(fileNumber<0){
+            fileNumber=allFiles.length-1;
         }
-        else  {
-            vid.muted = false;
-            vid.volume += 0.1;
+        if(fileNumber>allFiles.length-1){
+            fileNumber=0;
         }
+        setFilesInfo();
+        return fileNumber;
     }
-    if(e.keyCode == 83/*s*/){
-        if(vid.volume <0.15){
-            vid.muted = true;
-        }
-        else  {
-            vid.muted = false;
-            vid.volume -= 0.1;
-        }
-    }
-    if(e.keyCode == 81/*q*/){
-        vid.webkitRequestFullscreen();
-    }
-    if(e.keyCode == 69/*e*/){
-        vid.webkitExitFullScreen();   
-    }
-    if(e.keyCode == 86/*v*/){
-        vid.parentElement.style.width = parseInt(getComputedStyle(vid.parentElement).width)*1.1+'px';
-        vid.parentElement.style.height = parseInt(getComputedStyle(vid.parentElement).height)*1.1+'px';
-        vid.parentElement.style.top = parseInt(getComputedStyle(vid.parentElement).top)*0.9+'px';
-        vid.parentElement.style.left = parseInt(getComputedStyle(vid.parentElement).left)*0.9+'px';
-    }
-    if(e.keyCode == 70/*f*/){
-        location.hash = numb;
-    }
-      if(e.keyCode == 68/*d*/){
-        start(++numb);
-          e.stopPropagation();
-    }
-}, false);
 
-setInterval(function(){   
-    el = document.querySelectorAll('a[name="expandfunc"]');
-    amountOfWebm.innerHTML = numb+1 + ' из ' + el.length;
-    if(el.length != 0) {
-        amountOfWebm.style.visibility = "visible";
+    function setFilesInfo(){
+        $(amountFiles).text(fileNumber+' out of '+(allFiles.length-1));
     }
-    vid = document.getElementById('html5video');
+    setFilesInfo();
 
-    if(vid){
-        durationVideo.style.visibility = "visible";
-
-        durationVideo.innerHTML = Math.floor(vid.currentTime) +" / "+ Math.floor(vid.duration);
-
-        // console.log(new Date(vid.played.end(0)*1000).toUTCString().split(/ /)[4] +" из "+ new Date(vid.duration*1000).toUTCString().split(/ /)[4]);
-
-        /* var fullScreen = document.getElementById('fullscreen-container');
-        fullScreen.onclick = function(event){
-            vid.pause(); 
-             event.stopPropagation();
-            return false;
-        };*/
-        vid.classList.add('cur');
-        vid.onmousemove = function(){
-            vid.classList.remove('cur');
-        };
-
-        for(var i = 0; i<el.length; i++){
-            if(vid.querySelector('source').getAttribute('src') == el[i].getAttribute('href')){
-                numb = i;
-            }
-            if(!el[i].querySelector('a')){
-                var a = document.createElement('a');
-                a.setAttribute('name', i);
-                el[i].appendChild(a);
+    function getNumberOfCurrentFile(){
+        for(var i = 0; i<allFiles.length; i++){
+            if($(videoPlayer).find('source').attr('src') == $(allFiles[i]).parent().attr('href')){
+                fileNumber = i;
             }
         }
-        vid.removeAttribute('loop');
-        vid.onended = function(){
-            start(++numb);
-        };
+        setFilesInfo();
     }
-    else{
-        durationVideo.style.visibility = "hidden";
-    }
-}, 1000);
 
-next.onmouseover = function() {
-    document.documentElement.style.paddingRight = "3px";
-    document.documentElement.style.overflow = 'hidden';
-};
-next.onmouseout = function(){
-    document.documentElement.style.paddingRight = "0px";
-    document.documentElement.style.overflow = 'visible';
-};
-next.onwheel = function(){
-    document.documentElement.style.paddingRight = "0px";
-    document.documentElement.style.overflow = 'visible';
-};
+    setInterval(function(){
+        videoPlayer = $('#html5video')[0];
+        var playerEl = $(videoPlayer);
+        playerEl.addClass('cur');
+        videoPlayer?$(durationVideo).text(Math.floor(videoPlayer.currentTime) +"s. /"+ Math.floor(videoPlayer.duration) +"s."):$(durationVideo).text('');
+        if(!once){
+            if(videoPlayer){
+                getNumberOfCurrentFile();
+                playerEl.on('mousemove', function(){
+                    playerEl.removeClass('cur');
+                });
+                playerEl.removeAttr('loop');
+                playerEl.on('ended', function(){
+                    switchFile(++fileNumber);
+                });
+                once = true;
+            }
+        }
+    }, 1000);
+
+    setInterval(function(){
+        allFiles = $('.img.preview');
+        setFilesInfo();
+    }, 5000);
+});
