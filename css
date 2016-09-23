@@ -35,11 +35,16 @@ also you need to install userscript*/
     top: 0;
     transition: all .5s;
     z-index: 0;
+    cursor: pointer;
 }
 
 .nextFileSwitch:hover, .previousFileSwitch:hover {
     background: rgba(0,0,0, .7);
     padding: 350px 0;
+}
+
+.nextFileSwitch:active, .previousFileSwitch:active {
+    padding: 375px 0;
 }
 
 .previousFileSwitch {
